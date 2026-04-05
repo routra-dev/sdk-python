@@ -1,0 +1,11 @@
+# openapi-python-client configuration
+# Docs: https://openapi-python-client.readthedocs.io/en/latest/configuration.html
+
+project_name_override: "routra-generated"
+package_name_override: "routra._generated"
+
+# Keep field naming consistent with the API (snake_case from server)
+field_prefix: ""
+
+# Omit the example client script (we use our own wrapper in _client.py)
+post_hooks: []

@@ -1,7 +1,7 @@
 [project]
 name = "routra"
 version = "0.1.0"
-description = "Add your description here"
+description = "Routra Python SDK — OpenAI-compatible client with intelligent multi-provider routing"
 readme = "README.md"
 authors = [
     { name = "Asman Mirza", email = "rambo007.am@gmail.com" }
@@ -11,6 +11,33 @@ dependencies = [
     "openai>=2.30.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "openapi-python-client>=0.21",
+]
+
 [build-system]
 requires = ["uv_build>=0.9.16,<0.10.0"]
 build-backend = "uv_build"
+
+# ── Codegen ────────────────────────────────────────────────────────────────────
+# Regenerate the management API types from the contracts spec:
+#   uv run codegen
+# Or against the live public spec:
+#   SPEC_URL=https://raw.githubusercontent.com/routra/contracts/main/openapi/routra.yaml uv run codegen
+# Or locally in routra-core (contracts submodule present):
+#   SPEC_URL=../../contracts/openapi/routra.yaml uv run codegen
+[tool.uv.scripts]
+codegen = """
+python -c "
+import os, subprocess, sys
+spec = os.environ.get('SPEC_URL', 'https://raw.githubusercontent.com/routra/contracts/main/openapi/routra.yaml')
+is_url = spec.startswith('http')
+cmd = ['openapi-python-client', 'generate' if is_url else 'generate',
+       '--url' if is_url else '--path', spec,
+       '--output-path', 'src/routra/_generated',
+       '--overwrite',
+       '--config', 'codegen.yaml']
+sys.exit(subprocess.call(cmd))
+"
+"""
