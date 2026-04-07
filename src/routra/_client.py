@@ -1,5 +1,5 @@
 """
-Routra client — subclasses openai.OpenAI.
+Routra client - subclasses openai.OpenAI.
 Adds:
   - Typed .routra on completion responses
   - .policy() helper to set X-Routra-Policy header

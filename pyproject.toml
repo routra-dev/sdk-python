@@ -1,7 +1,7 @@
 [project]
 name = "routra"
 version = "0.1.0"
-description = "Routra Python SDK — OpenAI-compatible client with intelligent multi-provider routing"
+description = "Routra Python SDK - OpenAI-compatible client with intelligent multi-provider routing"
 readme = "README.md"
 authors = [
     { name = "Asman Mirza", email = "rambo007.am@gmail.com" }
