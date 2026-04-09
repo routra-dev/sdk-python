@@ -12,7 +12,7 @@ Usage:
         model="auto",
         messages=[{"role": "user", "content": "Hello"}]
     )
-    print(resp.routra.provider, resp.routra.cost_usd)
+    print(resp.routra.provider, resp.routra.score)
 """
 
 from routra._client import Routra, AsyncRoutra

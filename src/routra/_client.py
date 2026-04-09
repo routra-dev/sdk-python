@@ -3,11 +3,11 @@ Routra client - subclasses openai.OpenAI.
 Adds:
   - Typed .routra on completion responses
   - .policy() helper to set X-Routra-Policy header
-  - .batch, .usage, .policies namespaces (TODO Phase 4: generated from OpenAPI spec)
 """
 from __future__ import annotations
 
 import functools
+import os
 from typing import Optional, Any
 import openai
 
@@ -31,28 +31,37 @@ class Routra(openai.OpenAI):
     Routra client. Drop-in replacement for openai.OpenAI.
 
     Args:
-        api_key:  Routra API key (rtr-...)
+        api_key:  Routra API key (rtr-...). Falls back to ROUTRA_API_KEY env var.
         policy:   Default routing policy name (sets X-Routra-Policy header)
-        base_url: Override API base URL (useful for local dev)
+        base_url: Override API base URL. Falls back to ROUTRA_BASE_URL env var.
     """
 
     def __init__(
         self,
-        api_key: str,
+        api_key: Optional[str] = None,
         policy: Optional[str] = None,
-        base_url: str = BASE_URL,
+        base_url: Optional[str] = None,
         **kwargs,
     ):
+        resolved_key = api_key or os.environ.get("ROUTRA_API_KEY")
+        if not resolved_key:
+            raise ValueError(
+                "No API key provided. Pass api_key= or set ROUTRA_API_KEY env var."
+            )
+
+        resolved_url = base_url or os.environ.get("ROUTRA_BASE_URL", BASE_URL)
+
         headers = kwargs.pop("default_headers", {})
         if policy:
             headers["X-Routra-Policy"] = policy
 
         super().__init__(
-            api_key=api_key,
-            base_url=base_url,
+            api_key=resolved_key,
+            base_url=resolved_url,
             default_headers=headers,
             **kwargs,
         )
+        self._routra_policy = policy
 
         # Wrap chat.completions.create to inject typed .routra field (non-streaming)
         _orig = self.chat.completions.create
@@ -81,34 +90,43 @@ class AsyncRoutra(openai.AsyncOpenAI):
 
     def __init__(
         self,
-        api_key: str,
+        api_key: Optional[str] = None,
         policy: Optional[str] = None,
-        base_url: str = BASE_URL,
+        base_url: Optional[str] = None,
         **kwargs,
     ):
+        resolved_key = api_key or os.environ.get("ROUTRA_API_KEY")
+        if not resolved_key:
+            raise ValueError(
+                "No API key provided. Pass api_key= or set ROUTRA_API_KEY env var."
+            )
+
+        resolved_url = base_url or os.environ.get("ROUTRA_BASE_URL", BASE_URL)
+
         headers = kwargs.pop("default_headers", {})
         if policy:
             headers["X-Routra-Policy"] = policy
 
         super().__init__(
-            api_key=api_key,
-            base_url=base_url,
+            api_key=resolved_key,
+            base_url=resolved_url,
             default_headers=headers,
             **kwargs,
         )
+        self._routra_policy = policy
 
-        # Wrap async chat.completions.create to inject typed .routra field
+        # Wrap chat.completions.create to inject typed .routra field (non-streaming)
         _orig = self.chat.completions.create
 
         @functools.wraps(_orig)
-        async def _wrapped_async(*args, **kwargs):
+        async def _wrapped(*args, **kwargs):
             resp = await _orig(*args, **kwargs)
             stream = kwargs.get("stream", False)
             if not stream:
                 _inject_routra(resp)
             return resp
 
-        self.chat.completions.create = _wrapped_async  # type: ignore[method-assign]
+        self.chat.completions.create = _wrapped  # type: ignore[method-assign]
 
     def with_policy(self, policy: str) -> "AsyncRoutra":
         """Return a copy of this client with the given policy set."""
