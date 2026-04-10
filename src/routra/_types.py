@@ -5,7 +5,7 @@ from typing import Optional
 
 @dataclass
 class RoutingMetadata:
-    """Routing metadata returned by Routra on every non-streaming completion response."""
+    """Routing metadata returned by Routra on every non-streaming response."""
 
     provider: str
     latency_ms: int
@@ -13,6 +13,8 @@ class RoutingMetadata:
     cost_usd: Optional[float] = None
     input_tokens: Optional[int] = None
     output_tokens: Optional[int] = None
+    usage_unit: Optional[str] = None
+    usage_value: Optional[float] = None
     failover: Optional[bool] = None
     ttfb_ms: Optional[int] = None
 
@@ -25,6 +27,8 @@ class RoutingMetadata:
             cost_usd=d.get("cost_usd"),
             input_tokens=d.get("input_tokens"),
             output_tokens=d.get("output_tokens"),
+            usage_unit=d.get("usage_unit"),
+            usage_value=d.get("usage_value"),
             failover=d.get("failover"),
             ttfb_ms=d.get("ttfb_ms"),
         )

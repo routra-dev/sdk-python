@@ -17,6 +17,7 @@ Usage:
 
 from routra._client import Routra, AsyncRoutra
 from routra._types import RoutingMetadata
+from routra.management import ManagementClient
 
-__all__ = ["Routra", "AsyncRoutra", "RoutingMetadata"]
+__all__ = ["Routra", "AsyncRoutra", "RoutingMetadata", "ManagementClient"]
 __version__ = "0.1.0"
